@@ -192,6 +192,16 @@ public class RabbitConfig {
 
     // ===============以上是验证Headers Exchange的队列和交互机==========
 
+    /**
+     * 申明distribu队列
+     *
+     * @return
+     */
+    @Bean
+    public Queue DistribuQueue() {
+        return new Queue("distribu");
+    }
+
     @Bean
     public ConnectionFactory connectionFactory() {
 

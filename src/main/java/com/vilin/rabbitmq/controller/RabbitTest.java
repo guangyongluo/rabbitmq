@@ -27,6 +27,10 @@ public class RabbitTest {
     @Autowired
     private HeadersSender headersSender;
 
+    @Autowired
+    private DistributionSender distributionSender;
+
+
     /**
      * 单生产者-单消费者
      */
@@ -89,4 +93,15 @@ public class RabbitTest {
         headersSender.send();
     }
 
+    /**
+     * 分发机制消息发送测试
+     */
+    @GetMapping("/distribu")
+    public void distribu() {
+        //distributionSender.send(3);
+        for (int i = 0; i < 5; i++) {
+            //发送任务复杂度都为1的消息
+            distributionSender.send(1);
+        }
+    }
 }
