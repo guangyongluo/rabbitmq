@@ -1,9 +1,13 @@
 package com.vilin.rabbitmq.config;
 
+import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
+import org.springframework.amqp.rabbit.transaction.RabbitTransactionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
@@ -200,6 +204,55 @@ public class RabbitConfig {
     @Bean
     public Queue DistribuQueue() {
         return new Queue("distribu");
+    }
+
+    /**
+     * 声明transition2队列
+     *
+     * @return
+     */
+    @Bean
+    public Queue transitionQueue() {
+        return new Queue("transition2");
+    }
+
+    /**
+     * 事务管理
+     *
+     * @return
+     */
+    @Bean
+    public RabbitTransactionManager rabbitTransactionManager() {
+        return new RabbitTransactionManager(connectionFactory());
+    }
+
+    /**
+     * 自定义消费者
+     */
+    public class TransitionConsumer implements ChannelAwareMessageListener {
+
+        @Override
+        public void onMessage(Message message, Channel channel) throws Exception {
+            byte[] body = message.getBody();
+            System.out.println("TransitionConsumer: " + new String(body));
+            // 确认消息成功消费
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            // 除以0，模拟异常，进行事务回滚
+            // int t = 1 / 0;
+        }
+    }
+
+    @Bean
+    public SimpleMessageListenerContainer messageListenerContainer() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory());
+        container.setTransactionManager(rabbitTransactionManager());
+        container.setChannelTransacted(true);
+        // 开启手动确认
+        container.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        container.setQueues(transitionQueue());
+        container.setMessageListener(new TransitionConsumer());
+        return container;
     }
 
     @Bean

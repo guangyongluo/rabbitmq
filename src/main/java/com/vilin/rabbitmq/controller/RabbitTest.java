@@ -30,6 +30,8 @@ public class RabbitTest {
     @Autowired
     private DistributionSender distributionSender;
 
+    @Autowired
+    private TransactionSender2 transactionSender;
 
     /**
      * 单生产者-单消费者
@@ -103,5 +105,13 @@ public class RabbitTest {
             //发送任务复杂度都为1的消息
             distributionSender.send(1);
         }
+    }
+
+    /**
+     * 事务消息发送测试
+     */
+    @GetMapping("/transition")
+    public void transition() {
+        transactionSender.send("Transition:  ");
     }
 }
