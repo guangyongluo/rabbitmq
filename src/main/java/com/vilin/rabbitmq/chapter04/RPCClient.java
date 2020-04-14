@@ -19,7 +19,11 @@ public class RPCClient implements AutoCloseable {
 
     public RPCClient() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
+        factory.setUsername("admin");
+        factory.setPassword("admin@123");
         factory.setHost("192.168.193.132");
+        factory.setVirtualHost("/");
+        factory.setPort(5672);
 
         connection = factory.newConnection();
         channel = connection.createChannel();

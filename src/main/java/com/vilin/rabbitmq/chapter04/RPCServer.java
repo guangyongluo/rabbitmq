@@ -14,20 +14,24 @@ public class RPCServer {
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
+        factory.setUsername("admin");
+        factory.setPassword("admin@123");
         factory.setHost("192.168.193.132");
+        factory.setVirtualHost("/");
+        factory.setPort(5672);
 
         try (Connection connection = factory.newConnection();
              Channel channel = connection.createChannel()) {
-            channel.queueDeclare(RPC_QUEUE_NAME, false, false, false, null);
-            channel.queuePurge(RPC_QUEUE_NAME);
+             channel.queueDeclare(RPC_QUEUE_NAME, false, false, false, null);
+             channel.queuePurge(RPC_QUEUE_NAME);
 
-            channel.basicQos(1);
+             channel.basicQos(1);
 
-            System.out.println(" [x] Awaiting RPC requests");
+             System.out.println(" [x] Awaiting RPC requests");
 
-            Object monitor = new Object();
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+             Object monitor = new Object();
+             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                 AMQP.BasicProperties replyProps = new AMQP.BasicProperties
                         .Builder()
                         .correlationId(delivery.getProperties().getCorrelationId())
                         .build();
